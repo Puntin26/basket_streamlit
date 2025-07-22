@@ -225,6 +225,7 @@ def get_estadisticas_juego(id_juego: str):
 
     return df_local, df_visit
 
+
 # Helper - ESTADISTICA_JUEGO (INSERT)
 def insert_estadistica_juego(id_juego: str, id_estadistica: str, id_jugador: str, cantidad: int):
     exec_sql(

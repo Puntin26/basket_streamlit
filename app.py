@@ -571,32 +571,33 @@ def main():
             st.warning("No hay juegos registrados.")
         else:
             opts = df_jg.apply(
-                lambda r: f"{r.IdJuego} – {r.DescripcionJuego} ({r.FechaYHoraJuego})",
+                lambda r: f"{r.IdJuego} - {r.DescripcionJuego} ({r.FechaYHoraJuego})",
                 axis=1
             ).tolist()
             sel = st.selectbox("Selecciona el juego", opts)
-            id_sel = sel.split(" – ")[0]
+            id_sel = sel.split(" - ")[0]
 
             # 2) Ejecutar SP y obtener DataFrames
             try:
                 df_local, df_visit = get_estadisticas_juego(id_sel)
 
-                # 3) Encabezados manuales (ya que los PRINT no llegan como tablas)
+                # 3) Encabezados manuales (los PRINT no llegan como tablas)
                 curr = df_jg[df_jg.IdJuego == id_sel].iloc[0]
-                st.markdown(f"**Juego:** {id_sel}  **Fecha:** {curr.FechaYHoraJuego}")
+                st.markdown(f"**Juego:** {id_sel}  **Fecha:** {curr.FechaYHoraJuego}")
+
                 # Nombre de equipos
                 df_eq = list_equipos()
                 nom_local = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoA, "NomEquipo"].iloc[0]
                 nom_visit = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoB, "NomEquipo"].iloc[0]
 
-                # 4) Mostrar tablas
+                #4) Mostrar tablas
                 st.markdown(f"#### Equipo Local: {nom_local}")
                 st.dataframe(df_local, use_container_width=True)
 
                 st.markdown(f"#### Equipo Visitante: {nom_visit}")
                 st.dataframe(df_visit, use_container_width=True)
 
-                # 5) Marcador final
+                #5) Marcador final
                 pts_local = int(df_local.loc[df_local["Jugador"] == "Total", "Puntos"])
                 pts_visit = int(df_visit.loc[df_visit["Jugador"] == "Total", "Puntos"])
                 ganador = (
