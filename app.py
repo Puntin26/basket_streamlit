@@ -14,7 +14,7 @@ from helpers import (
 )
 
 # Conf Streamlit
-st.set_page_config(page_title="Gestión de Liga", layout="centered")
+st.set_page_config(page_title="Gestión de Liga", layout="wide")
 
 
 
