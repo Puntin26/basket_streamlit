@@ -213,6 +213,35 @@ def delete_juego(id_juego: str):
         (id_juego,),
     )
 
+# -------------------------------------------------------------------------
+# Helpers de negocio – JUEGO (SP Estadísticas)
+# -------------------------------------------------------------------------
+
+def get_estadisticas_juego(id_juego: str):
+    """
+    Ejecuta el sp_EstadisticasDelJuego y devuelve dos DataFrames:
+     - df_local: detalle (jugadores + total) del equipo local
+     - df_visit: detalle (jugadores + total) del equipo visitante
+    """
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("EXEC dbo.sp_EstadisticasDelJuego ?", id_juego)
+
+    # Primer resultset → stats del equipo local
+    cols = [col[0] for col in cur.description]
+    rows = cur.fetchall()
+    df_local = pd.DataFrame.from_records(rows, columns=cols)
+
+    # Segundo resultset → stats del equipo visitante
+    if cur.nextset():
+        cols = [col[0] for col in cur.description]
+        rows = cur.fetchall()
+        df_visit = pd.DataFrame.from_records(rows, columns=cols)
+    else:
+        df_visit = pd.DataFrame(columns=cols)
+
+    return df_local, df_visit
+
 
 # -------------------------------------------------------------------------
 # Configuración Streamlit
@@ -232,7 +261,8 @@ def main():
         "📊 CRUD Estadística",
         "⚽ CRUD Equipo",
         "🎮 CRUD Jugador",
-        "🎲 CRUD Juego"      
+        "🎲 CRUD Juego",
+        "📈 Estadísticas Juego"      
     ]
     choice = st.sidebar.radio("Menú principal", menu)
 
@@ -763,6 +793,59 @@ def main():
         # Lista de juegos siempre visible
         st.markdown("### Lista de juegos")
         st.dataframe(list_juegos(), use_container_width=True)
+
+
+            # ==================== ESTADÍSTICAS DEL JUEGO ====================
+    elif choice == "📈 Estadísticas Juego":
+        st.subheader("📊 Estadísticas del Juego")
+
+        # 1) Selección de partido
+        df_jg = list_juegos()
+        if df_jg.empty:
+            st.warning("No hay juegos registrados.")
+        else:
+            opts = df_jg.apply(
+                lambda r: f"{r.IdJuego} – {r.DescripcionJuego} ({r.FechaYHoraJuego})",
+                axis=1
+            ).tolist()
+            sel = st.selectbox("Selecciona el juego", opts)
+            id_sel = sel.split(" – ")[0]
+
+            # 2) Ejecutar SP y obtener DataFrames
+            try:
+                df_local, df_visit = get_estadisticas_juego(id_sel)
+
+                # 3) Encabezados manuales (ya que los PRINT no llegan como tablas)
+                curr = df_jg[df_jg.IdJuego == id_sel].iloc[0]
+                st.markdown(f"**Juego:** {id_sel}  **Fecha:** {curr.FechaYHoraJuego}")
+                # Nombre de equipos
+                df_eq = list_equipos()
+                nom_local = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoA, "NomEquipo"].iloc[0]
+                nom_visit = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoB, "NomEquipo"].iloc[0]
+
+                # 4) Mostrar tablas
+                st.markdown(f"#### Equipo Local: {nom_local}")
+                st.dataframe(df_local, use_container_width=True)
+
+                st.markdown(f"#### Equipo Visitante: {nom_visit}")
+                st.dataframe(df_visit, use_container_width=True)
+
+                # 5) Marcador final
+                pts_local = int(df_local.loc[df_local["Jugador"] == "Total", "Puntos"])
+                pts_visit = int(df_visit.loc[df_visit["Jugador"] == "Total", "Puntos"])
+                ganador = (
+                    nom_local if pts_local > pts_visit
+                    else nom_visit if pts_visit > pts_local
+                    else "Empate"
+                )
+                st.markdown(
+                    f"**Marcador final:** {nom_local} {pts_local} – {pts_visit} {nom_visit}  \n"
+                    f"**Ganador:** {ganador}"
+                )
+
+            except Exception as e:
+                st.error(f"Error al obtener estadísticas: {e}")
+
 
     
 
