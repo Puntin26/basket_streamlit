@@ -6,9 +6,7 @@ from dotenv import load_dotenv
 from datetime import date
 
 
-# -------------------------------------------------------------------------
 # Configuración base de datos
-# -------------------------------------------------------------------------
 
 load_dotenv()
 CONN_STR = os.getenv("DB_CONN")  # Driver=ODBC Driver 17 for SQL Server;Server=...;Database=...;UID=...;PWD=...;TrustServerCertificate=yes
@@ -17,7 +15,7 @@ CONN_STR = os.getenv("DB_CONN")  # Driver=ODBC Driver 17 for SQL Server;Server=.
 def get_conn():
     return pyodbc.connect(CONN_STR, autocommit=True)
 
-# ----------------------- Helpers genéricos -------------------------------
+# Helpers genéricos 
 
 def fetch_df(sql: str, params=()):
     """Ejecuta un SELECT y devuelve un DataFrame."""
@@ -28,9 +26,7 @@ def exec_sql(sql: str, params=()):
     with get_conn().cursor() as cur:
         cur.execute(sql, params)
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – CIUDAD
-# -------------------------------------------------------------------------
+# Helper - CIUDAD
 
 def insert_ciudad(nombre: str) -> str:
     sql = """
@@ -55,9 +51,7 @@ def delete_ciudad(id_ciudad: str):
         (id_ciudad,),
     )
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – ESTADÍSTICA
-# -------------------------------------------------------------------------
+# Helper - ESTADISTICA
 
 def insert_estadistica(descripcion: str, valor: int) -> str:
     sql = """
@@ -85,10 +79,8 @@ def delete_estadistica(id_est: str):
         "DELETE FROM dbo.Estadistica WHERE IdEstadistica = ?",
         (id_est,),
     )
-# -------------------------------------------------------------------------
-# Helpers de negocio – EQUIPO
-# -------------------------------------------------------------------------
 
+# Helper - EQUIPO
 def insert_equipo(nom_equipo: str, id_ciudad: str) -> str:
     sql = """
         DECLARE @newId CHAR(3);
@@ -118,9 +110,7 @@ def delete_equipo(id_equipo: str):
         (id_equipo,),
     )
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – JUGADOR
-# -------------------------------------------------------------------------
+# Helper - JUGADOR
 
 def list_jugadores() -> pd.DataFrame:
     return fetch_df(
@@ -157,9 +147,7 @@ def update_jugador(id_jugador: str, nom_jugador: str, id_ciudad: str, fecha_nac,
 def delete_jugador(id_jugador: str):
     exec_sql("DELETE FROM dbo.Jugador WHERE IdJugador = ?", (id_jugador,))
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – JUEGO
-# -------------------------------------------------------------------------
+# Helper – JUEGO
 
 def list_juegos() -> pd.DataFrame:
     return fetch_df(
@@ -213,9 +201,7 @@ def delete_juego(id_juego: str):
         (id_juego,),
     )
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – JUEGO (SP Estadísticas)
-# -------------------------------------------------------------------------
+# Helper - JUEGO (SP Estadisticas)
 
 def get_estadisticas_juego(id_juego: str):
     """
@@ -242,9 +228,7 @@ def get_estadisticas_juego(id_juego: str):
 
     return df_local, df_visit
 
-# -------------------------------------------------------------------------
-# Helpers de negocio – ESTADÍSTICA_JUEGO (INSERT)
-# -------------------------------------------------------------------------
+# Helper - ESTADISTICA_JUEGO (INSERT)
 def insert_estadistica_juego(id_juego: str, id_estadistica: str, id_jugador: str, cantidad: int):
     exec_sql(
         """
@@ -256,15 +240,11 @@ def insert_estadistica_juego(id_juego: str, id_estadistica: str, id_jugador: str
     )
 
 
-# -------------------------------------------------------------------------
 # Configuración Streamlit
-# -------------------------------------------------------------------------
-
 st.set_page_config(page_title="Gestión de Liga", layout="centered")
 
-# -------------------------------------------------------------------------
+
 # Main App
-# -------------------------------------------------------------------------
 
 def main():
     st.title("Sistema de Gestión de Liga")
@@ -280,7 +260,7 @@ def main():
     ]
     choice = st.sidebar.radio("Menú principal", menu)
 
-    # ============================= CIUDAD =============================
+    # CIUDAD =============================
     if choice == "🏙️ CRUD Ciudad":
         st.subheader("CRUD Ciudad")
 
@@ -368,7 +348,7 @@ def main():
         st.markdown("### Lista de ciudades")
         st.dataframe(list_ciudades(), use_container_width=True)
 
-    # ======================== ESTADÍSTICA =========================
+    # ESTADISTICA =========================
     elif choice == "📊 CRUD Estadística":
         st.subheader("CRUD Estadística")
 
@@ -464,7 +444,7 @@ def main():
         st.dataframe(list_estadisticas(), use_container_width=True)
 
 
-    # ======================== EQUIPO =========================
+    # EQUIPO =========================
     elif choice == "⚽ CRUD Equipo":
         st.subheader("CRUD Equipo")
         # Inicializar estados
@@ -561,7 +541,7 @@ def main():
         st.markdown("### Lista de equipos")
         st.dataframe(list_equipos(), use_container_width=True)
     
-    # ======================== JUGADOR =========================
+    # JUGADOR =========================
     elif choice == "🎮 CRUD Jugador":
         st.subheader("CRUD Jugador")
 
@@ -684,7 +664,7 @@ def main():
         st.markdown("### Lista de jugadores")
         st.dataframe(list_jugadores(), use_container_width=True)
 
-    # ======================== JUEGO =========================
+    # JUEGO =========================
     elif choice == "🎲 CRUD Juego":
         st.subheader("CRUD Juego")
 
@@ -809,7 +789,7 @@ def main():
         st.dataframe(list_juegos(), use_container_width=True)
 
 
-            # ==================== ESTADÍSTICAS DEL JUEGO ====================
+    # ESTADÍSTICAS DEL JUEGO ====================
     elif choice == "📈 Estadísticas Juego":
         st.subheader("📊 Estadísticas del Juego")
 
@@ -861,7 +841,7 @@ def main():
                 st.error(f"Error al obtener estadísticas: {e}")
 
 
-            # ================ AGREGAR ESTADÍSTICA AL JUEGO ================
+    #  AGREGAR ESTADÍSTICA AL JUEGO ================
     elif choice == "➕ Agregar Estadística Juego":
         st.subheader("➕ Agregar Estadística a un Juego")
 
@@ -922,7 +902,6 @@ def main():
                         )
                     except Exception as e:
                         st.error(f"Error al agregar estadística: {e}")
-
 
 
     
