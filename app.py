@@ -182,6 +182,37 @@ def insert_juego(id_equipoA: str, id_equipoB: str, fecha_hora) -> str:
     """
     return fetch_df(sql, (id_equipoA, id_equipoB, fecha_hora)).iloc[0, 0]
 
+def update_juego(id_juego: str, id_equipoA: str, id_equipoB: str, fecha_hora) -> None:
+    sql = """
+        UPDATE dbo.Juego
+        SET 
+            IdEquipoA       = ?,
+            IdEquipoB       = ?,
+            FechaYHoraJuego = ?,
+            DescripcionJuego = (
+                SELECT RTRIM(a.NomEquipo) + ' vs ' + RTRIM(b.NomEquipo)
+                FROM dbo.Equipo a
+                JOIN dbo.Equipo b 
+                  ON a.IdEquipo = ? 
+                 AND b.IdEquipo = ?
+            )
+        WHERE IdJuego = ?;
+    """
+    exec_sql(sql, (
+        id_equipoA,
+        id_equipoB,
+        fecha_hora,
+        id_equipoA,
+        id_equipoB,
+        id_juego,
+    ))
+
+def delete_juego(id_juego: str):
+    exec_sql(
+        "DELETE FROM dbo.Juego WHERE IdJuego = ?",
+        (id_juego,),
+    )
+
 
 # -------------------------------------------------------------------------
 # Configuración Streamlit
@@ -660,7 +691,74 @@ def main():
                 except Exception as e:
                     st.error(f"Error al insertar juego: {e}")
 
-        # (aquí quedaría la lógica de Modificar y Eliminar si la agregas luego)
+                    # Modificar Juego
+        elif st.session_state.show_juego_update:
+            st.markdown("### Modificar juego existente")
+            df_jg = list_juegos()
+            if df_jg.empty:
+                st.warning("No hay juegos registrados.")
+            else:
+                # 1) Selección del juego
+                opts = df_jg.apply(
+                    lambda r: f"{r.IdJuego} - {r.DescripcionJuego} ({r.FechaYHoraJuego})",
+                    axis=1
+                ).tolist()
+                sel = st.selectbox("Selecciona el juego", opts)
+                id_sel = sel.split(" - ")[0]
+                curr = df_jg[df_jg.IdJuego == id_sel].iloc[0]
+
+                # 2) Dropdown de Equipos
+                df_eq = list_equipos()
+                eq_opts = [f"{r.IdEquipo} - {r.NomEquipo}" for _, r in df_eq.iterrows()]
+                idx_a = next(i for i,o in enumerate(eq_opts) if o.startswith(curr.IdEquipoA))
+                idx_b = next(i for i,o in enumerate(eq_opts) if o.startswith(curr.IdEquipoB))
+                new_a = st.selectbox("Nuevo Equipo A", eq_opts, index=idx_a)
+                new_b = st.selectbox("Nuevo Equipo B", eq_opts, index=idx_b)
+
+                # 3) Fecha y hora
+                new_fecha = st.date_input(
+                    "Nueva fecha del juego",
+                    value=curr.FechaYHoraJuego.date()
+                )
+                new_hora = st.time_input(
+                    "Nueva hora del juego",
+                    value=curr.FechaYHoraJuego.time()
+                )
+
+                # 4) Botón de actualizar
+                if st.button("Actualizar Juego"):
+                    id_a = new_a.split(" - ")[0]
+                    id_b = new_b.split(" - ")[0]
+                    from datetime import datetime
+                    nueva_fecha_hora = datetime.combine(new_fecha, new_hora)
+                    try:
+                        update_juego(id_sel, id_a, id_b, nueva_fecha_hora)
+                        st.success(f"Juego {id_sel} actualizado correctamente.")
+                        st.session_state.show_juego_update = False
+                    except Exception as e:
+                        st.error(f"Error al actualizar juego: {e}")
+
+                # Eliminar Juego
+        elif st.session_state.show_juego_delete:
+            st.markdown("### Eliminar juego")
+            df_jg = list_juegos()
+            if df_jg.empty:
+                st.warning("No hay juegos registrados.")
+            else:
+                opts = df_jg.apply(
+                    lambda r: f"{r.IdJuego} - {r.DescripcionJuego} ({r.FechaYHoraJuego})",
+                    axis=1
+                ).tolist()
+                sel = st.selectbox("Selecciona el juego a eliminar", opts)
+                id_sel = sel.split(" - ")[0]
+                if st.button("Eliminar Juego", key="btn_delete_juego"):
+                    try:
+                        delete_juego(id_sel)
+                        st.success(f"Juego {id_sel} eliminado correctamente.")
+                        st.session_state.show_juego_delete = False
+                    except Exception as e:
+                        st.error(f"Error al eliminar juego: {e}")
+
 
         # Lista de juegos siempre visible
         st.markdown("### Lista de juegos")
