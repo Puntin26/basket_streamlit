@@ -242,6 +242,19 @@ def get_estadisticas_juego(id_juego: str):
 
     return df_local, df_visit
 
+# -------------------------------------------------------------------------
+# Helpers de negocio – ESTADÍSTICA_JUEGO (INSERT)
+# -------------------------------------------------------------------------
+def insert_estadistica_juego(id_juego: str, id_estadistica: str, id_jugador: str, cantidad: int):
+    exec_sql(
+        """
+        INSERT INTO dbo.EstadisticaJuego
+            (IdJuego, IdEstadistica, IdJugador, CantEstadisticaRegistrada)
+        VALUES (?, ?, ?, ?)
+        """,
+        (id_juego, id_estadistica, id_jugador, cantidad),
+    )
+
 
 # -------------------------------------------------------------------------
 # Configuración Streamlit
@@ -262,7 +275,8 @@ def main():
         "⚽ CRUD Equipo",
         "🎮 CRUD Jugador",
         "🎲 CRUD Juego",
-        "📈 Estadísticas Juego"      
+        "📈 Estadísticas Juego",
+        "➕ Agregar Estadística Juego"     
     ]
     choice = st.sidebar.radio("Menú principal", menu)
 
@@ -845,6 +859,70 @@ def main():
 
             except Exception as e:
                 st.error(f"Error al obtener estadísticas: {e}")
+
+
+            # ================ AGREGAR ESTADÍSTICA AL JUEGO ================
+    elif choice == "➕ Agregar Estadística Juego":
+        st.subheader("➕ Agregar Estadística a un Juego")
+
+        # 1) Selección de juego
+        df_jg = list_juegos()
+        if df_jg.empty:
+            st.warning("No hay juegos registrados.")
+        else:
+            opts_jg = df_jg.apply(
+                lambda r: f"{r.IdJuego} - {r.DescripcionJuego} ({r.FechaYHoraJuego})",
+                axis=1
+            ).tolist()
+            sel_juego = st.selectbox("Selecciona el juego", opts_jg)
+            id_juego = sel_juego.split(" - ")[0]
+
+            # 2) Selección de equipo (A o B)
+            curr = df_jg[df_jg.IdJuego == id_juego].iloc[0]
+            df_eq = list_equipos()
+            # extrae nombres para los dos equipos del juego
+            equipos = []
+            for col in ("IdEquipoA", "IdEquipoB"):
+                eq_id = curr[col]
+                nom = df_eq.loc[df_eq.IdEquipo == eq_id, "NomEquipo"].iloc[0]
+                equipos.append(f"{eq_id} - {nom}")
+            sel_eq = st.selectbox("Selecciona el equipo", equipos)
+            id_equipo = sel_eq.split(" - ")[0]
+
+            # 3) Selección de jugador del equipo
+            df_jug = list_jugadores()
+            df_jug_eq = df_jug[df_jug.IdEquipo == id_equipo]
+            if df_jug_eq.empty:
+                st.warning("No hay jugadores en este equipo.")
+            else:
+                opts_jug = df_jug_eq.apply(
+                    lambda r: f"{r.IdJugador} - {r.NomJugador}", axis=1
+                ).tolist()
+                sel_jug = st.selectbox("Selecciona el jugador", opts_jug)
+                id_jugador = sel_jug.split(" - ")[0]
+
+                # 4) Selección de tipo de estadística
+                df_est = list_estadisticas()
+                opts_est = df_est.apply(
+                    lambda r: f"{r.IdEstadistica} - {r.DescripcionEstadistica}", axis=1
+                ).tolist()
+                sel_est = st.selectbox("Selecciona la estadística", opts_est)
+                id_est = sel_est.split(" - ")[0]
+
+                # 5) Cantidad a registrar
+                cantidad = st.number_input("Cantidad registrada", min_value=0, step=1)
+
+                # Botón de inserción
+                if st.button("Agregar estadística"):
+                    try:
+                        insert_estadistica_juego(id_juego, id_est, id_jugador, int(cantidad))
+                        st.success(
+                            f"Estadística {id_est} ({df_est.loc[df_est.IdEstadistica==id_est,'DescripcionEstadistica'].iloc[0]}) "
+                            f"para jugador {id_jugador} en juego {id_juego} registrada."
+                        )
+                    except Exception as e:
+                        st.error(f"Error al agregar estadística: {e}")
+
 
 
     
