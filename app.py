@@ -3,19 +3,13 @@ from datetime import date, datetime
 from helpers import (
     # genéricos
     get_conn, fetch_df, exec_sql,
-    # Ciudad
+    #App helpers
     insert_ciudad, list_ciudades, update_ciudad, delete_ciudad,
-    # Estadística
     insert_estadistica, list_estadisticas, update_estadistica, delete_estadistica,
-    # Equipo
     insert_equipo, list_equipos, update_equipo, delete_equipo,
-    # Jugador
     insert_jugador, list_jugadores, update_jugador, delete_jugador,
-    # Juego
     list_juegos, insert_juego, update_juego, delete_juego,
-    # SP Estadísticas
     get_estadisticas_juego,
-    # EstadísticaJuego
     insert_estadistica_juego,
 )
 
