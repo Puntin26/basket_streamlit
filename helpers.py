@@ -4,15 +4,15 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-# ————————————————————— Configuración base de datos —————————————————————
+#  Configuracion base de datos 
 load_dotenv()
 CONN_STR = os.getenv("DB_CONN")
 
-@st.cache_resource  # mantiene una sola conexión por sesión
+@st.cache_resource  # mantiene una sola conexion por sesion
 def get_conn():
     return pyodbc.connect(CONN_STR, autocommit=True)
 
-# Helpers genéricos 
+# Helpers genericos 
 
 def fetch_df(sql: str, params=()):
     """Ejecuta un SELECT y devuelve un DataFrame."""
@@ -210,12 +210,12 @@ def get_estadisticas_juego(id_juego: str):
     cur = conn.cursor()
     cur.execute("EXEC dbo.sp_EstadisticasDelJuego ?", id_juego)
 
-    # Primer resultset → stats del equipo local
+    # Primer resultset -> stats del equipo local
     cols = [col[0] for col in cur.description]
     rows = cur.fetchall()
     df_local = pd.DataFrame.from_records(rows, columns=cols)
 
-    # Segundo resultset → stats del equipo visitante
+    # Segundo resultset -> stats del equipo visitante
     if cur.nextset():
         cols = [col[0] for col in cur.description]
         rows = cur.fetchall()
