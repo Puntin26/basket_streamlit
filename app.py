@@ -13,11 +13,10 @@ from helpers import (
     insert_estadistica_juego,
 )
 
-# Configuración Streamlit
+# Conf Streamlit
 st.set_page_config(page_title="Gestión de Liga", layout="centered")
 
 
-# Main App
 
 def main():
     st.title("Sistema de Gestión de Liga")
@@ -41,7 +40,7 @@ def main():
         for key in ("show_ciudad_insert", "show_ciudad_update", "show_ciudad_delete"):
             st.session_state.setdefault(key, False)
 
-        # Botones de acción
+        # Botones de accion
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("➕ Insertar Ciudad"):
@@ -129,7 +128,7 @@ def main():
         for key in ("show_est_insert", "show_est_update", "show_est_delete"):
             st.session_state.setdefault(key, False)
 
-        # Botones de acción
+        # Botones de accion
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button("➕ Insertar Estadística"):
@@ -147,7 +146,7 @@ def main():
                 st.session_state.show_est_insert = False
                 st.session_state.show_est_update = False
 
-        # Insertar Estadística
+        # Insertar Estadistica
         if st.session_state.show_est_insert:
             st.markdown("### Insertar nueva estadística")
             with st.form("form_add_est", clear_on_submit=True):
@@ -165,7 +164,7 @@ def main():
                 else:
                     st.warning("La descripción no puede estar vacía.")
 
-        # Modificar Estadística
+        # Modificar Estadistica
         elif st.session_state.show_est_update:
             st.markdown("### Modificar estadística existente")
             df_est = list_estadisticas()
@@ -188,16 +187,16 @@ def main():
                             st.success(f"Estadística {id_sel} actualizada correctamente.")
                             st.session_state.show_est_update = False
                         except Exception as Error:
-                            st.error(f"Error al actualizar la estadística: {Error}")
+                            st.error(f"Error al actualizar la estadistica: {Error}")
                     else:
-                        st.warning("La descripción no puede estar vacía.")
+                        st.warning("La descripcion no puede estar vacía.")
 
-        # Eliminar Estadística
+        # Eliminar Estadistica
         elif st.session_state.show_est_delete:
-            st.markdown("### Eliminar estadística")
+            st.markdown("### Eliminar estadistica")
             df_est = list_estadisticas()
             if df_est.empty:
-                st.warning("No hay estadísticas registradas.")
+                st.warning("No hay estadisticas registradas.")
             else:
                 opts = df_est.apply(
                     lambda r: f"{r.IdEstadistica} - {r.DescripcionEstadistica} ({r.Valor})", axis=1
@@ -212,7 +211,7 @@ def main():
                     except Exception as Error:
                         st.error(f"Error al eliminar la estadística: {Error}")
 
-        # Lista de estadísticas siempre visible
+        # Lista de estadisticas siempre visible
         st.markdown("### Lista de estadísticas")
         st.dataframe(list_estadisticas(), use_container_width=True)
 
@@ -224,7 +223,7 @@ def main():
         for key in ("show_eq_insert", "show_eq_update", "show_eq_delete"):
             st.session_state.setdefault(key, False)
 
-        # Botones de acción
+        # Botones de accion
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button("➕ Insertar Equipo"):
@@ -292,7 +291,7 @@ def main():
                     else:
                         st.warning("El nombre del equipo no puede estar vacío.")
 
-        # Eliminar Equipo (placeholder)
+        # Eliminar Equipo 
         elif st.session_state.show_eq_delete:
             st.markdown("### Eliminar equipo")
             df_eq = list_equipos()
@@ -322,7 +321,7 @@ def main():
         for key in ("show_jg_insert", "show_jg_update", "show_jg_delete"):
             st.session_state.setdefault(key, False)
 
-        # Botones de acción
+        # Botones de accion
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("➕ Insertar Jugador"):
@@ -445,7 +444,7 @@ def main():
         for key in ("show_juego_insert", "show_juego_update", "show_juego_delete"):
             st.session_state.setdefault(key, False)
 
-        # Botones de acción
+        # Botones de accion
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button("➕ Insertar Juego"):
@@ -495,7 +494,7 @@ def main():
             if df_jg.empty:
                 st.warning("No hay juegos registrados.")
             else:
-                # 1) Selección del juego
+                # 1) Seleccion del juego
                 opts = df_jg.apply(
                     lambda r: f"{r.IdJuego} - {r.DescripcionJuego} ({r.FechaYHoraJuego})",
                     axis=1
@@ -522,7 +521,7 @@ def main():
                     value=curr.FechaYHoraJuego.time()
                 )
 
-                # 4) Botón de actualizar
+                # 4) Boton de actualizar
                 if st.button("Actualizar Juego"):
                     id_a = new_a.split(" - ")[0]
                     id_b = new_b.split(" - ")[0]
@@ -562,11 +561,11 @@ def main():
         st.dataframe(list_juegos(), use_container_width=True)
 
 
-    # ESTADÍSTICAS DEL JUEGO ====================
+    # ESTADISTICAS DEL JUEGO ====================
     elif choice == "📈 Estadísticas Juego":
         st.subheader("📊 Estadísticas del Juego")
 
-        # 1) Selección de partido
+        # 1) Seleccion de partido
         df_jg = list_juegos()
         if df_jg.empty:
             st.warning("No hay juegos registrados.")
@@ -614,11 +613,11 @@ def main():
                 st.error(f"Error al obtener estadísticas: {e}")
 
 
-    #  AGREGAR ESTADÍSTICA AL JUEGO ================
+    #  AGREGAR ESTADISTICA AL JUEGO ================
     elif choice == "➕ Agregar Estadística Juego":
         st.subheader("➕ Agregar Estadística a un Juego")
 
-        # 1) Selección de juego
+        # 1) Seleccion de juego
         df_jg = list_juegos()
         if df_jg.empty:
             st.warning("No hay juegos registrados.")
@@ -630,7 +629,7 @@ def main():
             sel_juego = st.selectbox("Selecciona el juego", opts_jg)
             id_juego = sel_juego.split(" - ")[0]
 
-            # 2) Selección de equipo (A o B)
+            # 2) Seleccion de equipo (A o B)
             curr = df_jg[df_jg.IdJuego == id_juego].iloc[0]
             df_eq = list_equipos()
             # extrae nombres para los dos equipos del juego
@@ -642,7 +641,7 @@ def main():
             sel_eq = st.selectbox("Selecciona el equipo", equipos)
             id_equipo = sel_eq.split(" - ")[0]
 
-            # 3) Selección de jugador del equipo
+            # 3) Seleccion de jugador del equipo
             df_jug = list_jugadores()
             df_jug_eq = df_jug[df_jug.IdEquipo == id_equipo]
             if df_jug_eq.empty:
@@ -654,7 +653,7 @@ def main():
                 sel_jug = st.selectbox("Selecciona el jugador", opts_jug)
                 id_jugador = sel_jug.split(" - ")[0]
 
-                # 4) Selección de tipo de estadística
+                # 4) Seleccion de tipo de estadística
                 df_est = list_estadisticas()
                 opts_est = df_est.apply(
                     lambda r: f"{r.IdEstadistica} - {r.DescripcionEstadistica}", axis=1
@@ -665,7 +664,7 @@ def main():
                 # 5) Cantidad a registrar
                 cantidad = st.number_input("Cantidad registrada", min_value=0, step=1)
 
-                # Botón de inserción
+                # Boton de insercion
                 if st.button("Agregar estadística"):
                     try:
                         insert_estadistica_juego(id_juego, id_est, id_jugador, int(cantidad))
