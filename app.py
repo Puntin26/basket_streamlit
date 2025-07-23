@@ -325,17 +325,17 @@ def main():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("➕ Insertar Jugador"):
-                st.session_state.show_jg_insert = True
+                st.session_state.show_jg_insert ^= True
                 st.session_state.show_jg_update = False
                 st.session_state.show_jg_delete = False
         with col2:
             if st.button("✏️ Modificar Jugador"):
-                st.session_state.show_jg_update = True
+                st.session_state.show_jg_update ^= True
                 st.session_state.show_jg_insert = False
                 st.session_state.show_jg_delete = False
         with col3:
             if st.button("🗑️ Eliminar Jugador"):
-                st.session_state.show_jg_delete = True
+                st.session_state.show_jg_delete ^= True
                 st.session_state.show_jg_insert = False
                 st.session_state.show_jg_update = False
 
@@ -530,12 +530,15 @@ def main():
                     id_b = new_b.split(" - ")[0]
                     from datetime import datetime
                     nueva_fecha_hora = datetime.combine(new_fecha, new_hora)
-                    try:
-                        update_juego(id_sel, id_a, id_b, nueva_fecha_hora)
-                        st.success(f"Juego {id_sel} actualizado correctamente.")
-                        st.session_state.show_juego_update = False
-                    except Exception as e:
-                        st.error(f"Error al actualizar juego: {e}")
+                    if id_a == id_b:
+                        st.error("No puedes seleccionar el mismo equipo para ambos lados.")
+                    else:
+                        try:
+                            update_juego(id_sel, id_a, id_b, nueva_fecha_hora)
+                            st.success(f"Juego {id_sel} actualizado correctamente.")
+                            st.session_state.show_juego_update = False
+                        except Exception as e:
+                            st.error(f"Error al actualizar juego: {e}")
 
                 # Eliminar Juego
         elif st.session_state.show_juego_delete:
