@@ -480,12 +480,15 @@ def main():
                 id_b = sel_b.split(" - ")[0]
                 from datetime import datetime
                 fecha_hora = datetime.combine(fecha, hora)
-                try:
-                    new_id = insert_juego(id_a, id_b, fecha_hora)
-                    st.success(f"Juego creado con Id: {new_id}")
-                    st.session_state.show_juego_insert = False
-                except Exception as e:
-                    st.error(f"Error al insertar juego: {e}")
+                if id_a == id_b:
+                    st.error("No puedes seleccionar el mismo equipo para ambos lados.")
+                else:
+                    try:
+                        new_id = insert_juego(id_a, id_b, fecha_hora)
+                        st.success(f"Juego creado con Id: {new_id}")
+                        st.session_state.show_juego_insert = False
+                    except Exception as e:
+                        st.error(f"Error al insertar juego: {e}")
 
                     # Modificar Juego
         elif st.session_state.show_juego_update:
