@@ -618,7 +618,7 @@ def main():
     elif choice == "➕ Agregar Estadística Juego":
         st.subheader("➕ Agregar Estadística a un Juego")
 
-        # 1) Seleccion de juego
+        # Seleccion de juego
         df_jg = list_juegos()
         if df_jg.empty:
             st.warning("No hay juegos registrados.")
@@ -630,7 +630,7 @@ def main():
             sel_juego = st.selectbox("Selecciona el juego", opts_jg)
             id_juego = sel_juego.split(" - ")[0]
 
-            # 2) Seleccion de equipo (A o B)
+            # Seleccion de equipo (A o B)
             curr = df_jg[df_jg.IdJuego == id_juego].iloc[0]
             df_eq = list_equipos()
             # extrae nombres para los dos equipos del juego
@@ -642,7 +642,7 @@ def main():
             sel_eq = st.selectbox("Selecciona el equipo", equipos)
             id_equipo = sel_eq.split(" - ")[0]
 
-            # 3) Seleccion de jugador del equipo
+            # Seleccion de jugador del equipo
             df_jug = list_jugadores()
             df_jug_eq = df_jug[df_jug.IdEquipo == id_equipo]
             if df_jug_eq.empty:
@@ -654,7 +654,7 @@ def main():
                 sel_jug = st.selectbox("Selecciona el jugador", opts_jug)
                 id_jugador = sel_jug.split(" - ")[0]
 
-                # 4) Seleccion de tipo de estadística
+                # Seleccion de tipo de estadística
                 df_est = list_estadisticas()
                 opts_est = df_est.apply(
                     lambda r: f"{r.IdEstadistica} - {r.DescripcionEstadistica}", axis=1
@@ -662,10 +662,9 @@ def main():
                 sel_est = st.selectbox("Selecciona la estadística", opts_est)
                 id_est = sel_est.split(" - ")[0]
 
-                # 5) Cantidad a registrar
+                # Cantidad a registrar
                 cantidad = st.number_input("Cantidad registrada", min_value=0, step=1)
 
-                # Boton de insercion
                 if st.button("Agregar estadística"):
                     try:
                         insert_estadistica_juego(id_juego, id_est, id_jugador, int(cantidad))
