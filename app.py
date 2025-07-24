@@ -506,13 +506,12 @@ def main():
                 id_sel = sel.split(" - ")[0]
                 curr = df_jg[df_jg.IdJuego == id_sel].iloc[0]
 
-                # 2) Dropdown de Equipos
+                # 2) Mostrar equipos (no modificables)
                 df_eq = list_equipos()
-                eq_opts = [f"{r.IdEquipo} - {r.NomEquipo}" for _, r in df_eq.iterrows()]
-                idx_a = next(i for i,o in enumerate(eq_opts) if o.startswith(curr.IdEquipoA))
-                idx_b = next(i for i,o in enumerate(eq_opts) if o.startswith(curr.IdEquipoB))
-                new_a = st.selectbox("Nuevo Equipo A", eq_opts, index=idx_a)
-                new_b = st.selectbox("Nuevo Equipo B", eq_opts, index=idx_b)
+                nom_a = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoA, "NomEquipo"].iloc[0]
+                nom_b = df_eq.loc[df_eq.IdEquipo == curr.IdEquipoB, "NomEquipo"].iloc[0]
+                st.text(f"Equipo A: {curr.IdEquipoA} - {nom_a}")
+                st.text(f"Equipo B: {curr.IdEquipoB} - {nom_b}")
 
                 # 3) Fecha y hora
                 new_fecha = st.date_input(
@@ -526,19 +525,14 @@ def main():
 
                 # 4) Boton de actualizar
                 if st.button("Actualizar Juego"):
-                    id_a = new_a.split(" - ")[0]
-                    id_b = new_b.split(" - ")[0]
                     from datetime import datetime
                     nueva_fecha_hora = datetime.combine(new_fecha, new_hora)
-                    if id_a == id_b:
-                        st.error("No puedes seleccionar el mismo equipo para ambos lados.")
-                    else:
-                        try:
-                            update_juego(id_sel, id_a, id_b, nueva_fecha_hora)
-                            st.success(f"Juego {id_sel} actualizado correctamente.")
-                            st.session_state.show_juego_update = False
-                        except Exception as e:
-                            st.error(f"Error al actualizar juego: {e}")
+                    try:
+                        update_juego(id_sel, curr.IdEquipoA, curr.IdEquipoB, nueva_fecha_hora)
+                        st.success(f"Juego {id_sel} actualizado correctamente.")
+                        st.session_state.show_juego_update = False
+                    except Exception as e:
+                        st.error(f"Error al actualizar juego: {e}")
 
                 # Eliminar Juego
         elif st.session_state.show_juego_delete:
